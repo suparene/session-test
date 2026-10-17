@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Session test</title>
+</head>
+<body>
+  <h3>Supabase session test</h3>
+  <div id="out" style="white-space: pre; font-family: monospace;">Signing in...</div>
+
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    // Replace these with your own project_id and publishable_key
+    const project_id = 'abcd...'
+    const publishable_key = 'sb_publishable_...'
+
+    // Ask for user email and password
+    const email = prompt('Email')
+    const password = prompt('Password')
+
+    // Should supabase-js auto-refresh tokens?
+    const auto_refresh = true
+
+    const supabase = createClient(
+      `https://${project_id}.supabase.co`,
+      publishable_key,
+      { auth: { autoRefreshToken: auto_refresh } }
+    )
+
+    const storageKey = `sb-${project_id}-auth-token`
+    const out = document.getElementById('out')
+
+    // Sign in to start a session
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      out.textContent = `Sign-in failed: ${error.message}`
+      throw error
+    }
+
+    // Read data from local storage and show info on screen
+    async function render() {
+      // Read session data from local storage
+      const raw = localStorage.getItem(storageKey)
+      if (!raw) { out.textContent = 'No session'; return }
+      const session = JSON.parse(raw)
+
+      // Current time, in seconds
+      const now = Math.floor(Date.now() / 1000)
+
+      // Calculate the seconds left
+      const seconds_left = session.expires_at - now
+
+      // Expiration time, as Date (which takes milliseconds)
+      const expires = new Date(session.expires_at * 1000)
+
+      out.textContent =
+        `autorefresh:  ${auto_refresh}\n` +
+        `expires_in:   ${session.expires_in}\n` +
+        `expires_at:   ${session.expires_at}\n` +
+        `expires UTC:  ${expires.toISOString()}\n` +
+        `seconds left: ${seconds_left}`
+    }
+
+    // Update screen every second
+    setInterval(render, 1000)
+    render()
+
+    </script>
+</body>
+</html>
