@@ -5,7 +5,7 @@ Demonstrate session expiration
 # Preparation
 
 Create a user: \
-In project's `Dashboard > Authentication > Users` click `Add user`, and select `Add a new user`.\
+In project's `Dashboard > Authentication > Users` click `Add user`, and select `Add a new user`.
 
 Fill in new user details, e.g. :
 
